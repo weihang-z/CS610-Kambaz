@@ -5,9 +5,19 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { assignments } from "@/app/(kambaz)/Database";
 
+interface Assignment {
+  _id: string;
+  title: string;
+  description: string;
+  points: number;
+  dueDate: string;
+  availableDate: string;
+  course: string;
+}
+
 export default function Editor() {
   const { cid, aid } = useParams();
-  const assignment = assignments.find((a: any) => a._id === aid);
+  const assignment = assignments.find((a: Assignment) => a._id === aid);
 
   if (!assignment) {
     return <div className="p-3">Assignment not found</div>;

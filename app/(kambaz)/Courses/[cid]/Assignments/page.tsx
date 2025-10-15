@@ -20,6 +20,16 @@ import {
 import { FaRegFileAlt } from "react-icons/fa";
 import GreenCheckmark from "../Modules/GreenCheckmark";
 
+interface Assignment {
+  _id: string;
+  title: string;
+  description: string;
+  points: number;
+  dueDate: string;
+  availableDate: string;
+  course: string;
+}
+
 export default function Assignments() {
   const { cid } = useParams<{ cid: string }>();
   const assignments = db.assignments;
@@ -68,9 +78,9 @@ export default function Assignments() {
           id="wd-assignment-list"
           className="wd-assignment-list"
         >
-          {assignments.filter((assignment: any) => {
+          {assignments.filter((assignment: Assignment) => {
             return assignment.course === cid;
-          }).map((assignment: any) => {
+          }).map((assignment: Assignment) => {
             return (
               <ListGroup.Item key={assignment._id} className="wd-assignment-list-item py-3 px-3">
               <div className="d-flex align-items-start">
