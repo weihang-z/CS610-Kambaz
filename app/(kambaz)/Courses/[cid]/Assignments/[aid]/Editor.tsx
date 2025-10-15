@@ -1,14 +1,24 @@
 "use client";
 
 import { Form, Row, Col, Button, Card } from "react-bootstrap";
+import { useParams } from "next/navigation";
+import Link from "next/link";
+import { assignments } from "@/app/(kambaz)/Database";
 
 export default function Editor() {
+  const { cid, aid } = useParams();
+  const assignment = assignments.find((a: any) => a._id === aid);
+
+  if (!assignment) {
+    return <div className="p-3">Assignment not found</div>;
+  }
+
   return (
     <div id="wd-assignments-editor" className="p-3">
       <Form>
         <Form.Group className="mb-3" controlId="wd-name">
           <Form.Label>Assignment Name</Form.Label>
-          <Form.Control defaultValue="A1 - ENV + HTML" />
+          <Form.Control defaultValue={assignment.title} />
         </Form.Group>
 
         <Form.Group className="mb-3" controlId="wd-description">
@@ -16,7 +26,7 @@ export default function Editor() {
           <Form.Control
             as="textarea"
             rows={5}
-            defaultValue={`The assignment is available online Submit a link to the landing page of your Web application running on Vercel.`}
+            defaultValue={assignment.description}
           />
         </Form.Group>
 
@@ -26,7 +36,7 @@ export default function Editor() {
           </Col>
           <Col md={4}>
             <Form.Group controlId="wd-points" className="mb-3">
-              <Form.Control defaultValue={100} />
+              <Form.Control defaultValue={assignment.points} />
             </Form.Group>
           </Col>
         </Row>
@@ -130,7 +140,7 @@ export default function Editor() {
                   <Form.Label>Due</Form.Label>
                   <Form.Control
                     type="date"
-                    defaultValue="2024-05-13"
+                    defaultValue={assignment.dueDate}
                   />
                 </Form.Group>
                 <Row className="mb-3">
@@ -139,7 +149,7 @@ export default function Editor() {
                       <Form.Label>Available from</Form.Label>
                       <Form.Control
                         type="date"
-                        defaultValue="2024-05-06"
+                        defaultValue={assignment.availableDate}
                       />
                     </Form.Group>
                   </Col>
@@ -158,10 +168,14 @@ export default function Editor() {
           </Col>
         </Row>
 
-        <Button variant="secondary" className="me-2">
-          Cancel
-        </Button>
-        <Button variant="danger">Save</Button>
+        <Link href={`/Courses/${cid}/Assignments`}>
+          <Button variant="secondary" className="me-2">
+            Cancel
+          </Button>
+        </Link>
+        <Link href={`/Courses/${cid}/Assignments`}>
+          <Button variant="danger">Save</Button>
+        </Link>
       </Form>
     </div>
   );
