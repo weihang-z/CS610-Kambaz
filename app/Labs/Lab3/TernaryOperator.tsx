@@ -1,4 +1,4 @@
-let loggedIn = true;
+const loggedIn = true;
 export default function TernaryOperator() {
   return(
    <div id="wd-ternary-operator">

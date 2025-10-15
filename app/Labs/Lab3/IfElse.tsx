@@ -1,4 +1,4 @@
-let true1 = true, false1 = false;
+const true1 = true, false1 = false;
 export default function IfElse() {
   return (
    <div id="wd-if-else">
