@@ -33,7 +33,7 @@ export default function TOC() {
         </NavLink>
       </NavItem>
       <NavItem>
-        <NavLink href="https://github.com/weihang-z">My GitHub</NavLink>
+        <NavLink href="https://github.com/weihang-z/CS610-Kambaz">My GitHub Repo</NavLink>
       </NavItem>
     </Nav>
   );
