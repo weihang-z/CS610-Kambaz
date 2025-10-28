@@ -1,15 +1,40 @@
-import { ReactNode } from "react";
+"use client";
+import { ReactNode, useEffect } from "react";
 import CourseNavigation from "./Navigation";
+import { useSelector } from "react-redux";
+import { useParams, useRouter } from "next/navigation";
 import { FaAlignJustify } from "react-icons/fa";
-import { courses } from "../../Database";
 import Breadcrumb from "./Breadcrumb";
 
-export default async function CoursesLayout({
-  children,
-  params,
-}: Readonly<{ children: ReactNode; params: Promise<{ cid: string }> }>) {
-  const { cid } = await params;
-  const course = courses.find((course) => course._id === cid);
+export default function CoursesLayout({ children }: { children: ReactNode }) {
+  const { cid } = useParams();
+  const router = useRouter();
+  const { courses } = useSelector((state: any) => state.coursesReducer);
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
+  const { enrollments } = useSelector((state: any) => state.enrollmentsReducer);
+  const course = courses.find((course: any) => course._id === cid);
+
+  const isEnrolled = enrollments.some(
+    (enrollment: any) =>
+      enrollment.user === currentUser?._id && enrollment.course === cid
+  );
+
+  const isFaculty = currentUser?.role === "FACULTY";
+
+  useEffect(() => {
+    if (!currentUser) {
+      alert("Please sign in to access this course.");
+      router.push("/Dashboard");
+    } else if (!isEnrolled && !isFaculty) {
+      alert("You are not enrolled in this course.");
+      router.push("/Dashboard");
+    }
+  }, [currentUser, isEnrolled, isFaculty, router]);
+
+  if (!currentUser || (!isEnrolled && !isFaculty)) {
+    return null;
+  }
+
   return (
     <div id="wd-courses">
       <h2 className="text-danger">

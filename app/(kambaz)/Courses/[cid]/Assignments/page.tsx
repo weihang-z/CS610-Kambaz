@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import * as db from "../../../Database";
+import { useSelector, useDispatch } from "react-redux";
+import { useState } from "react";
 import {
   Button,
   InputGroup,
@@ -10,6 +11,7 @@ import {
   Card,
   ListGroup,
   Badge,
+  Modal,
 } from "react-bootstrap";
 import {
   BsSearch,
@@ -17,8 +19,9 @@ import {
   BsGripVertical,
   BsThreeDotsVertical,
 } from "react-icons/bs";
-import { FaRegFileAlt } from "react-icons/fa";
+import { FaRegFileAlt, FaTrash } from "react-icons/fa";
 import GreenCheckmark from "../Modules/GreenCheckmark";
+import { deleteAssignment } from "./reducer";
 
 interface Assignment {
   _id: string;
@@ -32,7 +35,31 @@ interface Assignment {
 
 export default function Assignments() {
   const { cid } = useParams<{ cid: string }>();
-  const assignments = db.assignments;
+  const dispatch = useDispatch();
+  const { assignments } = useSelector((state: any) => state.assignmentsReducer);
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [assignmentToDelete, setAssignmentToDelete] = useState<string | null>(null);
+
+  const isFaculty = currentUser?.role === "FACULTY";
+
+  const handleDeleteClick = (assignmentId: string) => {
+    setAssignmentToDelete(assignmentId);
+    setShowDeleteDialog(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (assignmentToDelete) {
+      dispatch(deleteAssignment(assignmentToDelete));
+    }
+    setShowDeleteDialog(false);
+    setAssignmentToDelete(null);
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteDialog(false);
+    setAssignmentToDelete(null);
+  };
 
   return (
     <div id="wd-assignments" className="p-3">
@@ -45,18 +72,22 @@ export default function Assignments() {
             <Form.Control id="wd-search-assignment" placeholder="Search..." />
           </InputGroup>
         </div>
-        <div className="float-end">
-          <Button
-            id="wd-add-assignment-group"
-            variant="secondary"
-            className="me-2"
-          >
-            <BsPlusLg className="me-2" /> Group
-          </Button>
-          <Button id="wd-add-assignment" variant="danger" href="">
-            <BsPlusLg className="me-2" /> Assignment
-          </Button>
-        </div>
+        {isFaculty && (
+          <div className="float-end">
+            <Button
+              id="wd-add-assignment-group"
+              variant="secondary"
+              className="me-2"
+            >
+              <BsPlusLg className="me-2" /> Group
+            </Button>
+            <Link href={`/Courses/${cid}/Assignments/new`}>
+              <Button id="wd-add-assignment" variant="danger">
+                <BsPlusLg className="me-2" /> Assignment
+              </Button>
+            </Link>
+          </div>
+        )}
       </div>
 
       <Card className="shadow-sm">
@@ -101,6 +132,16 @@ export default function Assignments() {
                   </div>
                 </div>
                 <div className="ms-2 d-flex align-items-center">
+                  {isFaculty && (
+                    <FaTrash 
+                      className="text-danger me-2 mb-1" 
+                      style={{ cursor: "pointer" }}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleDeleteClick(assignment._id);
+                      }}
+                    />
+                  )}
                   <GreenCheckmark />
                   <BsThreeDotsVertical className="ms-2 text-secondary" />
                 </div>
@@ -110,6 +151,23 @@ export default function Assignments() {
           })}
         </ListGroup>
       </Card>
+
+      <Modal show={showDeleteDialog} onHide={handleCancelDelete}>
+        <Modal.Header closeButton>
+          <Modal.Title>Delete Assignment</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          Are you sure you want to remove this assignment?
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCancelDelete}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={handleConfirmDelete}>
+            Yes
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }

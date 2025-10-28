@@ -1,9 +1,10 @@
 "use client";
 
 import { Form, Row, Col, Button, Card } from "react-bootstrap";
-import { useParams } from "next/navigation";
-import Link from "next/link";
-import { assignments } from "@/app/(kambaz)/Database";
+import { useParams, useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { addAssignment, updateAssignment } from "../reducer";
 
 interface Assignment {
   _id: string;
@@ -12,15 +13,65 @@ interface Assignment {
   points: number;
   dueDate: string;
   availableDate: string;
+  availableUntilDate?: string;
   course: string;
 }
 
 export default function Editor() {
   const { cid, aid } = useParams();
-  const assignment = assignments.find((a: Assignment) => a._id === aid);
+  const router = useRouter();
+  const dispatch = useDispatch();
+  const { assignments } = useSelector((state: any) => state.assignmentsReducer);
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
+  
+  const isFaculty = currentUser?.role === "FACULTY";
+  const isNewAssignment = aid === "new";
+  const existingAssignment = !isNewAssignment 
+    ? assignments.find((a: Assignment) => a._id === aid)
+    : null;
 
-  if (!assignment) {
+  const [assignment, setAssignment] = useState<Assignment>({
+    _id: "",
+    title: "",
+    description: "",
+    points: 100,
+    dueDate: "",
+    availableDate: "",
+    availableUntilDate: "",
+    course: cid as string,
+  });
+
+  useEffect(() => {
+    if (existingAssignment) {
+      setAssignment(existingAssignment);
+    }
+  }, [existingAssignment]);
+
+  const handleSave = () => {
+    if (isNewAssignment) {
+      dispatch(addAssignment(assignment));
+    } else {
+      dispatch(updateAssignment(assignment));
+    }
+    router.push(`/Courses/${cid}/Assignments`);
+  };
+
+  const handleCancel = () => {
+    router.push(`/Courses/${cid}/Assignments`);
+  };
+
+  useEffect(() => {
+    if (isNewAssignment && !isFaculty) {
+      router.push(`/Courses/${cid}/Assignments`);
+    }
+  }, [isNewAssignment, isFaculty, router, cid]);
+
+  if (!isNewAssignment && !existingAssignment) {
     return <div className="p-3">Assignment not found</div>;
+  }
+
+  if (isNewAssignment && !isFaculty) {
+    return null;
   }
 
   return (
@@ -28,7 +79,11 @@ export default function Editor() {
       <Form>
         <Form.Group className="mb-3" controlId="wd-name">
           <Form.Label>Assignment Name</Form.Label>
-          <Form.Control defaultValue={assignment.title} />
+          <Form.Control 
+            value={assignment.title}
+            onChange={(e) => setAssignment({ ...assignment, title: e.target.value })}
+            disabled={!isFaculty}
+          />
         </Form.Group>
 
         <Form.Group className="mb-3" controlId="wd-description">
@@ -36,7 +91,9 @@ export default function Editor() {
           <Form.Control
             as="textarea"
             rows={5}
-            defaultValue={assignment.description}
+            value={assignment.description}
+            onChange={(e) => setAssignment({ ...assignment, description: e.target.value })}
+            disabled={!isFaculty}
           />
         </Form.Group>
 
@@ -46,11 +103,18 @@ export default function Editor() {
           </Col>
           <Col md={4}>
             <Form.Group controlId="wd-points" className="mb-3">
-              <Form.Control defaultValue={assignment.points} />
+              <Form.Control 
+                type="number"
+                value={assignment.points}
+                onChange={(e) => setAssignment({ ...assignment, points: parseInt(e.target.value) || 0 })}
+                disabled={!isFaculty}
+              />
             </Form.Group>
           </Col>
         </Row>
-
+        
+        {isFaculty && (
+          <>
         <Row className="mb-3">
           <Col md={2} className="d-flex align-items-center">
             <Form.Label>Assignment Group</Form.Label>
@@ -150,7 +214,9 @@ export default function Editor() {
                   <Form.Label>Due</Form.Label>
                   <Form.Control
                     type="date"
-                    defaultValue={assignment.dueDate}
+                    value={assignment.dueDate}
+                    onChange={(e) => setAssignment({ ...assignment, dueDate: e.target.value })}
+                    disabled={!isFaculty}
                   />
                 </Form.Group>
                 <Row className="mb-3">
@@ -159,7 +225,9 @@ export default function Editor() {
                       <Form.Label>Available from</Form.Label>
                       <Form.Control
                         type="date"
-                        defaultValue={assignment.availableDate}
+                        value={assignment.availableDate}
+                        onChange={(e) => setAssignment({ ...assignment, availableDate: e.target.value })}
+                        disabled={!isFaculty}
                       />
                     </Form.Group>
                   </Col>
@@ -168,7 +236,9 @@ export default function Editor() {
                       <Form.Label>Until</Form.Label>
                       <Form.Control
                         type="date"
-                        defaultValue="2024-05-28"
+                        value={assignment.availableUntilDate || ""}
+                        onChange={(e) => setAssignment({ ...assignment, availableUntilDate: e.target.value })}
+                        disabled={!isFaculty}
                       />
                     </Form.Group>
                   </Col>
@@ -178,15 +248,17 @@ export default function Editor() {
           </Col>
         </Row>
 
-        <Link href={`/Courses/${cid}/Assignments`}>
-          <Button variant="secondary" className="me-2">
-            Cancel
+        <Button variant="secondary" className="me-2" onClick={handleCancel}>
+          {isFaculty ? "Cancel" : "Back"}
+        </Button>
+        {isFaculty && (
+          <Button variant="danger" onClick={handleSave}>
+            Save
           </Button>
-        </Link>
-        <Link href={`/Courses/${cid}/Assignments`}>
-          <Button variant="danger">Save</Button>
-        </Link>
-      </Form>
+        )}
+        </>
+        )}
+      </Form> 
     </div>
   );
 }

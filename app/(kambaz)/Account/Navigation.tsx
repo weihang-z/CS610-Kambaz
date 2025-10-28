@@ -2,34 +2,26 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSelector } from "react-redux";
 
 export default function AccountNavigation() {
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
+  const links = currentUser ? ["Profile"] : ["Signin", "Signup"];
   const pathname = usePathname();
-  const isActive = (href: string) => pathname?.startsWith(href);
+  const isActive = (href: string) => pathname?.includes(href) ? "active" : "";
 
   return (
     <div id="wd-account-navigation" className="wd list-group fs-5 rounded-0">
-      <Link
-        href="/Account/Signin"
-        id="wd-account-nav-signin"
-        className={`list-group-item text-danger border-0 ${isActive("/Account/Signin") ? "active" : ""}`}
-      >
-        Sign in
-      </Link>
-      <Link
-        href="/Account/Signup"
-        id="wd-account-nav-signup"
-        className={`list-group-item text-danger border-0 ${isActive("/Account/Signup") ? "active" : ""}`}
-      >
-        Sign up
-      </Link>
-      <Link
-        href="/Account/Profile"
-        id="wd-account-nav-profile"
-        className={`list-group-item text-danger border-0 ${isActive("/Account/Profile") ? "active" : ""}`}
-      >
-        Profile
-      </Link>
-    </div>
-  );
-}
+      {links.map((link) => (
+        <Link
+          key={link}
+          href={`/Account/${link}`}
+          id={`wd-account-nav-${link}`}
+          className={`list-group-item text-danger border-0 ${isActive(`/Account/${link}`)}`}
+        >
+          {link}
+        </Link>
+      ))}
+      </div>
+    );
+  }
