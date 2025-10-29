@@ -1,10 +1,20 @@
 import { useState } from "react";
+import React from "react";
+
+interface SerializedEvent {
+  target?: string;
+  [key: string]: unknown;
+}
+
 export default function EventObject() {
-  const [event, setEvent] = useState(null);
-  const handleClick = (e: any) => {
-    e.target = e.target.outerHTML;
-    delete e.view;
-    setEvent(e);
+  const [event, setEvent] = useState<SerializedEvent | null>(null);
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const serializedEvent: SerializedEvent = {
+      ...e,
+      target: (e.target as HTMLElement).outerHTML,
+    };
+    delete serializedEvent.view;
+    setEvent(serializedEvent);
   };
   return (
     <div>

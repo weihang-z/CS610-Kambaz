@@ -11,4 +11,5 @@ const store = configureStore({
     todosReducer
   }
 });
+export type Lab4RootState = ReturnType<typeof store.getState>;
 export default store;

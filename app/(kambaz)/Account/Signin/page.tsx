@@ -1,18 +1,23 @@
 "use client";
 import Link from "next/link";
 import { redirect } from "next/dist/client/components/navigation";
-import { setCurrentUser } from "../reducer";
+import { setCurrentUser, User } from "../reducer";
 import { useDispatch } from "react-redux";
 import { useState } from "react";
 import * as db from "../../Database";
 import { FormControl, Button } from "react-bootstrap";
 
+interface Credentials {
+  username?: string;
+  password?: string;
+}
+
 export default function Signin() {
- const [credentials, setCredentials] = useState<any>({});
+ const [credentials, setCredentials] = useState<Credentials>({});
  const dispatch = useDispatch();
  const signin = () => {
    const user = db.users.find(
-     (u: any) =>
+     (u: User) =>
        u.username === credentials.username &&
        u.password === credentials.password
    );

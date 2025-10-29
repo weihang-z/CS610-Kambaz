@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSelector } from "react-redux";
+import { RootState } from "../store";
 
 export default function AccountNavigation() {
-  const { currentUser } = useSelector((state: any) => state.accountReducer);
+  const { currentUser } = useSelector((state: RootState) => state.accountReducer);
   const links = currentUser ? ["Profile"] : ["Signin", "Signup"];
   const pathname = usePathname();
   const isActive = (href: string) => pathname?.includes(href) ? "active" : "";

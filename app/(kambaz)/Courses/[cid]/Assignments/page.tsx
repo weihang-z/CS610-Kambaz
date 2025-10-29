@@ -21,23 +21,14 @@ import {
 } from "react-icons/bs";
 import { FaRegFileAlt, FaTrash } from "react-icons/fa";
 import GreenCheckmark from "../Modules/GreenCheckmark";
-import { deleteAssignment } from "./reducer";
-
-interface Assignment {
-  _id: string;
-  title: string;
-  description: string;
-  points: number;
-  dueDate: string;
-  availableDate: string;
-  course: string;
-}
+import { deleteAssignment, Assignment } from "./reducer";
+import { RootState } from "../../../store";
 
 export default function Assignments() {
   const { cid } = useParams<{ cid: string }>();
   const dispatch = useDispatch();
-  const { assignments } = useSelector((state: any) => state.assignmentsReducer);
-  const { currentUser } = useSelector((state: any) => state.accountReducer);
+  const { assignments } = useSelector((state: RootState) => state.assignmentsReducer);
+  const { currentUser } = useSelector((state: RootState) => state.accountReducer);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [assignmentToDelete, setAssignmentToDelete] = useState<string | null>(null);
 
@@ -126,9 +117,13 @@ export default function Assignments() {
                   </Link>
                   <div className="text-muted small mt-1">
                     <span className="text-success">Multiple Modules</span>
-                    &nbsp;|&nbsp;<b>Not available until</b> {new Date(assignment.availableDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} at 12:00am
-                    &nbsp;|&nbsp;<b>Due</b> {new Date(assignment.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} at 11:59pm &nbsp;|&nbsp; {assignment.points}
-                    pts
+                    {assignment.availableDate && (
+                      <>&nbsp;|&nbsp;<b>Not available until</b> {new Date(assignment.availableDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} at 12:00am</>
+                    )}
+                    {assignment.dueDate && (
+                      <>&nbsp;|&nbsp;<b>Due</b> {new Date(assignment.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} at 11:59pm</>
+                    )}
+                    &nbsp;|&nbsp; {assignment.points} pts
                   </div>
                 </div>
                 <div className="ms-2 d-flex align-items-center">

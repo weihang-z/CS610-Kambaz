@@ -1,37 +1,21 @@
 "use client";
-import { addModule, editModule, updateModule, deleteModule }
+import { addModule, editModule, updateModule, deleteModule, Module, Lesson }
   from "./reducer";
 import { useSelector, useDispatch } from "react-redux";
-import { v4 as uuidv4 } from "uuid";
 import { useParams } from "next/navigation";
-import * as db from "../../../Database";
 import ModulesControls from "./ModulesControls";
 import { FormControl, ListGroup, ListGroupItem } from "react-bootstrap";
 import { BsGripVertical } from "react-icons/bs";
 import LessonControlButtons from "./LessonControlButtons";
 import ModuleControlButtons from "./ModuleControlButtons";
 import { useState } from "react";
-
-interface Lesson {
-  _id: string;
-  name: string;
-  description: string;
-  module: string;
-}
-
-interface Module {
-  _id: string;
-  name: string;
-  editing: boolean;
-  description: string;
-  course: string;
-  lessons?: Lesson[];
-}
+import { RootState } from "../../../store";
 
 export default function Modules() {
-  const { cid } = useParams();
+  const params = useParams();
+  const cid = Array.isArray(params.cid) ? params.cid[0] : params.cid;
   const [moduleName, setModuleName] = useState("");
-  const { modules } = useSelector((state: any) => state.modulesReducer);
+  const { modules } = useSelector((state: RootState) => state.modulesReducer);
   const dispatch = useDispatch();
 
   return (
@@ -40,7 +24,7 @@ export default function Modules() {
         setModuleName={setModuleName}
         moduleName={moduleName}
         addModule={() => {
-          dispatch(addModule({ name: moduleName, course: cid }));
+          dispatch(addModule({ name: moduleName, course: cid || "" }));
           setModuleName("");
         }}
       />

@@ -5,17 +5,23 @@ import { useSelector } from "react-redux";
 import { useParams, useRouter } from "next/navigation";
 import { FaAlignJustify } from "react-icons/fa";
 import Breadcrumb from "./Breadcrumb";
+import { RootState } from "../../store";
+
+interface Enrollment {
+  user: string;
+  course: string;
+}
 
 export default function CoursesLayout({ children }: { children: ReactNode }) {
   const { cid } = useParams();
   const router = useRouter();
-  const { courses } = useSelector((state: any) => state.coursesReducer);
-  const { currentUser } = useSelector((state: any) => state.accountReducer);
-  const { enrollments } = useSelector((state: any) => state.enrollmentsReducer);
-  const course = courses.find((course: any) => course._id === cid);
+  const { courses } = useSelector((state: RootState) => state.coursesReducer);
+  const { currentUser } = useSelector((state: RootState) => state.accountReducer);
+  const { enrollments } = useSelector((state: RootState) => state.enrollmentsReducer);
+  const course = courses.find((course) => course._id === cid);
 
   const isEnrolled = enrollments.some(
-    (enrollment: any) =>
+    (enrollment: Enrollment) =>
       enrollment.user === currentUser?._id && enrollment.course === cid
   );
 

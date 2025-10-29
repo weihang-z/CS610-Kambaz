@@ -4,25 +4,15 @@ import { Form, Row, Col, Button, Card } from "react-bootstrap";
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { addAssignment, updateAssignment } from "../reducer";
-
-interface Assignment {
-  _id: string;
-  title: string;
-  description: string;
-  points: number;
-  dueDate: string;
-  availableDate: string;
-  availableUntilDate?: string;
-  course: string;
-}
+import { addAssignment, updateAssignment, Assignment } from "../reducer";
+import { RootState } from "../../../../store";
 
 export default function Editor() {
   const { cid, aid } = useParams();
   const router = useRouter();
   const dispatch = useDispatch();
-  const { assignments } = useSelector((state: any) => state.assignmentsReducer);
-  const { currentUser } = useSelector((state: any) => state.accountReducer);
+  const { assignments } = useSelector((state: RootState) => state.assignmentsReducer);
+  const { currentUser } = useSelector((state: RootState) => state.accountReducer);
   
   const isFaculty = currentUser?.role === "FACULTY";
   const isNewAssignment = aid === "new";

@@ -1,26 +1,54 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { courses } from "../Database";
 import { v4 as uuidv4 } from "uuid";
-const initialState = {
+
+export interface Course {
+  _id: string;
+  name: string;
+  number: string;
+  startDate: string;
+  endDate: string;
+  department: string;
+  credits: number;
+  description: string;
+  author?: string;
+}
+
+interface CoursesState {
+  courses: Course[];
+}
+
+const initialState: CoursesState = {
  courses: courses,
 };
+
 const coursesSlice = createSlice({
  name: "courses",
  initialState,
  reducers: {
-   addNewCourse: (state, { payload: course }) => {
-     const newCourse = { ...course, _id: uuidv4() };
-     state.courses = [...state.courses, newCourse] as any;
+   addNewCourse: (state, { payload: course }: PayloadAction<Partial<Course>>) => {
+     const newCourse: Course = { 
+       ...course, 
+       _id: uuidv4(),
+       name: course.name || "",
+       number: course.number || "",
+       startDate: course.startDate || "",
+       endDate: course.endDate || "",
+       department: course.department || "",
+       credits: course.credits || 0,
+       description: course.description || ""
+     };
+     state.courses = [...state.courses, newCourse];
    },
-   deleteCourse: (state, { payload: courseId }) => {
+   deleteCourse: (state, { payload: courseId }: PayloadAction<string>) => {
      state.courses = state.courses.filter(
-       (course: any) => course._id !== courseId
+       (course) => course._id !== courseId
      );
    },
-   updateCourse: (state, { payload: course }) => {
-     state.courses = state.courses.map((c: any) =>
+   updateCourse: (state, { payload: course }: PayloadAction<Course>) => {
+     state.courses = state.courses.map((c) =>
        c._id === course._id ? course : c
-     ) as any;
+     );
    },
  },
 });

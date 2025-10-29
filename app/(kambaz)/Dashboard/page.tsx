@@ -1,7 +1,5 @@
 "use client";
-import { v4 as uuidv4 } from "uuid";
 import Link from "next/link";
-import * as db from "../Database";
 import {
   Button,
   Card,
@@ -14,29 +12,32 @@ import {
   Row,
 } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
-import { addNewCourse, deleteCourse, updateCourse } from "../Courses/reducer";
-import { enrollInCourse, unenrollFromCourse } from "../Database/reducer";
+import { addNewCourse, deleteCourse, updateCourse, Course } from "../Courses/reducer";
+import { enrollInCourse, unenrollFromCourse, Enrollment } from "../Database/reducer";
 import { useState } from "react";
+import { RootState } from "../store";
+
 export default function Dashboard() {
-  const { currentUser } = useSelector((state: any) => state.accountReducer);
-  const { enrollments } = useSelector((state: any) => state.enrollmentsReducer);
-  const { courses } = useSelector((state: any) => state.coursesReducer);
+  const { currentUser } = useSelector((state: RootState) => state.accountReducer);
+  const { enrollments } = useSelector((state: RootState) => state.enrollmentsReducer);
+  const { courses } = useSelector((state: RootState) => state.coursesReducer);
   const dispatch = useDispatch();
-  const [course, setCourse] = useState<any>({
+  const [course, setCourse] = useState<Course>({
     _id: "0",
     name: "New Course",
     number: "New Number",
     startDate: "2023-09-10",
     endDate: "2023-12-15",
-    image: "/images/reactjs.jpg",
     description: "New Description",
+    department: "",
+    credits: 0,
   });
   const [showAllCourses, setShowAllCourses] = useState(false);
 
   // Check if user is enrolled in a course
   const isEnrolled = (courseId: string) => {
     return enrollments.some(
-      (enrollment: any) =>
+      (enrollment: Enrollment) =>
         enrollment.user === currentUser?._id && enrollment.course === courseId
     );
   };
@@ -57,7 +58,7 @@ export default function Dashboard() {
   // Determine which courses to show
   const displayedCourses = showAllCourses
     ? courses
-    : courses.filter((course: any) => isEnrolled(course._id));
+    : courses.filter((course: Course) => isEnrolled(course._id));
 
   const isFaculty = currentUser?.role === "FACULTY";
 
@@ -113,7 +114,7 @@ export default function Dashboard() {
       </Button>
       <div id="wd-dashboard-courses">
         <Row xs={1} md={5} className="g-4">
-          {displayedCourses.map((course: any) => (
+          {displayedCourses.map((course: Course) => (
             <Col
               key={course._id}
               className="wd-dashboard-course"

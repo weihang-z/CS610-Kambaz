@@ -7,4 +7,6 @@ import enrollmentsReducer from "./Database/reducer";
 const store = configureStore({
  reducer: { coursesReducer, modulesReducer, assignmentsReducer, accountReducer, enrollmentsReducer },
 });
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
 export default store;

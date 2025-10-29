@@ -1,14 +1,18 @@
 import { useState } from "react";
 import { ListGroup, ListGroupItem } from "react-bootstrap";
 import { useSelector } from "react-redux";
+import { RootState } from "../../../app/(kambaz)/store";
+
+interface Todo {
+  id: string;
+  title: string;
+}
+
 export default function ArrayStateVariable() {
-  const { todos } = useSelector((state: any) => state.todosReducer);
+  const { todos } = useSelector((state: RootState) => state.todosReducer);
  const [array, setArray] = useState([1, 2, 3, 4, 5]);
  const addElement = () => {
    setArray([...array, Math.floor(Math.random() * 100)]);
- };
-const deleteElement = (index: number) => {
-   setArray(array.filter((item, i) => i !== index));
  };
  return (
   <div id="wd-array-state-variables">
@@ -16,7 +20,7 @@ const deleteElement = (index: number) => {
    <button onClick={addElement}>Add Element</button>
    <ul>
    <ListGroup>
-        {todos.map((todo: any) => (
+        {todos.map((todo: Todo) => (
           <ListGroupItem key={todo.id}>
             {todo.title}
           </ListGroupItem>

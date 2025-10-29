@@ -1,35 +1,57 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { modules } from "../../../Database";
 import { v4 as uuidv4 } from "uuid";
-const initialState = {
+
+export interface Lesson {
+  _id: string;
+  name: string;
+  description: string;
+  module: string;
+}
+
+export interface Module {
+  _id: string;
+  name: string;
+  description?: string;
+  course: string;
+  lessons?: Lesson[];
+  editing?: boolean;
+}
+
+interface ModulesState {
+  modules: Module[];
+}
+
+const initialState: ModulesState = {
   modules: modules,
 };
+
 const modulesSlice = createSlice({
   name: "modules",
   initialState,
   reducers: {
-    addModule: (state, { payload: module }) => {
-      const newModule: any = {
+    addModule: (state, { payload: module }: PayloadAction<Partial<Module>>) => {
+      const newModule: Module = {
         _id: uuidv4(),
         lessons: [],
-        name: module.name,
-        course: module.course,
+        name: module.name || "",
+        course: module.course || "",
       };
-      state.modules = [...state.modules, newModule] as any;
+      state.modules = [...state.modules, newModule];
     },
-    deleteModule: (state, { payload: moduleId }) => {
+    deleteModule: (state, { payload: moduleId }: PayloadAction<string>) => {
       state.modules = state.modules.filter(
-        (m: any) => m._id !== moduleId);
+        (m) => m._id !== moduleId);
     },
-    updateModule: (state, { payload: module }) => {
-      state.modules = state.modules.map((m: any) =>
+    updateModule: (state, { payload: module }: PayloadAction<Module>) => {
+      state.modules = state.modules.map((m) =>
         m._id === module._id ? module : m
-      ) as any;
+      );
     },
-    editModule: (state, { payload: moduleId }) => {
-      state.modules = state.modules.map((m: any) =>
+    editModule: (state, { payload: moduleId }: PayloadAction<string>) => {
+      state.modules = state.modules.map((m) =>
         m._id === moduleId ? { ...m, editing: true } : m
-      ) as any;
+      );
     },
   },
 });
