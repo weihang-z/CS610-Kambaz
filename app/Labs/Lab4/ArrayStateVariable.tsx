@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ListGroup, ListGroupItem } from "react-bootstrap";
 import { useSelector } from "react-redux";
-import { RootState } from "../../../app/(kambaz)/store";
+import { Lab4RootState } from "./store";
 
 interface Todo {
   id: string;
@@ -9,7 +9,7 @@ interface Todo {
 }
 
 export default function ArrayStateVariable() {
-  const { todos } = useSelector((state: RootState) => state.todosReducer);
+  const { todos } = useSelector((state: Lab4RootState) => state.todosReducer);
  const [array, setArray] = useState([1, 2, 3, 4, 5]);
  const addElement = () => {
    setArray([...array, Math.floor(Math.random() * 100)]);
