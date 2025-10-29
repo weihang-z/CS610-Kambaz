@@ -44,9 +44,11 @@ export default function Dashboard() {
 
   // Handle enrollment actions
   const handleEnroll = (courseId: string) => {
-    if (currentUser) {
-      dispatch(enrollInCourse({ userId: currentUser._id, courseId }));
+    if (!currentUser) {
+      alert("Please sign in to enroll in courses.");
+      return;
     }
+    dispatch(enrollInCourse({ userId: currentUser._id, courseId }));
   };
 
   const handleUnenroll = (courseId: string) => {
