@@ -11,15 +11,15 @@ import {
   FormControl,
   Row,
 } from "react-bootstrap";
+import * as client from "../Courses/client";
 import { useDispatch, useSelector } from "react-redux";
-import { addNewCourse, deleteCourse, updateCourse, Course } from "../Courses/reducer";
+import { addNewCourse, deleteCourse, updateCourse, Course, setCourses  } from "../Courses/reducer";
 import { enrollInCourse, unenrollFromCourse, Enrollment } from "../Database/reducer";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { RootState } from "../store";
 
 export default function Dashboard() {
   const { currentUser } = useSelector((state: RootState) => state.accountReducer);
-  const { enrollments } = useSelector((state: RootState) => state.enrollmentsReducer);
   const { courses } = useSelector((state: RootState) => state.coursesReducer);
   const dispatch = useDispatch();
   const [course, setCourse] = useState<Course>({
@@ -33,34 +33,95 @@ export default function Dashboard() {
     credits: 0,
   });
   const [showAllCourses, setShowAllCourses] = useState(false);
+  const [allCourses, setAllCourses] = useState<Course[]>([]);
 
-  // Check if user is enrolled in a course
+  const fetchCourses = async () => {
+    if (!currentUser) {
+      return;
+    }
+    try {
+      const myCourses = await client.findMyCourses();
+      dispatch(setCourses(myCourses));
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const fetchAllCourses = async () => {
+    try {
+      const courses = await client.fetchAllCourses();
+      setAllCourses(courses);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const onAddNewCourse = async () => {
+    const newCourse = await client.createCourse(course);
+    dispatch(setCourses([...courses, newCourse]));
+  };
+
+  const onDeleteCourse = async (courseId: string) => {
+    const status = await client.deleteCourse(courseId);
+    dispatch(setCourses(courses.filter((course) => course._id !== courseId)));
+  };
+
+  const onUpdateCourse = async () => {
+    await client.updateCourse(course);
+    dispatch(setCourses(courses.map((c) => {
+      if (c._id === course._id) { return course; }
+      else { return c; }
+    })));
+  };
+
+  useEffect(() => {
+    fetchCourses();
+    fetchAllCourses();
+  }, [currentUser]);
+
+  // Check if user is enrolled in a course (derived from Redux state)
   const isEnrolled = (courseId: string) => {
-    return enrollments.some(
-      (enrollment: Enrollment) =>
-        enrollment.user === currentUser?._id && enrollment.course === courseId
-    );
+    return courses.some((course: Course) => course._id === courseId);
   };
 
   // Handle enrollment actions
-  const handleEnroll = (courseId: string) => {
+  const handleEnroll = async (courseId: string) => {
     if (!currentUser) {
       alert("Please sign in to enroll in courses.");
       return;
     }
-    dispatch(enrollInCourse({ userId: currentUser._id, courseId }));
+    try {
+      await client.enrollInCourse(currentUser._id, courseId);
+      // Update Redux enrollments state (for course layout access check)
+      dispatch(enrollInCourse({ userId: currentUser._id, courseId }));
+      // Refetch courses to update enrolled courses list
+      await fetchCourses();
+    } catch (error) {
+      console.error("Failed to enroll:", error);
+      alert("Failed to enroll in course.");
+    }
   };
 
-  const handleUnenroll = (courseId: string) => {
-    if (currentUser) {
+  const handleUnenroll = async (courseId: string) => {
+    if (!currentUser) {
+      return;
+    }
+    try {
+      await client.unenrollFromCourse(currentUser._id, courseId);
+      // Update Redux enrollments state (for course layout access check)
       dispatch(unenrollFromCourse({ userId: currentUser._id, courseId }));
+      // Refetch courses to update enrolled courses list
+      await fetchCourses();
+    } catch (error) {
+      console.error("Failed to unenroll:", error);
+      alert("Failed to unenroll from course.");
     }
   };
 
   // Determine which courses to show
   const displayedCourses = showAllCourses
-    ? courses
-    : courses.filter((course: Course) => isEnrolled(course._id));
+    ? allCourses
+    : courses;
 
   const isFaculty = currentUser?.role === "FACULTY";
 
@@ -75,14 +136,14 @@ export default function Dashboard() {
             <button
               className="btn btn-primary float-end"
               id="wd-add-new-course-click"
-              onClick={() => dispatch(addNewCourse(course))}
+              onClick={onAddNewCourse}
             >
               {" "}
               Add{" "}
             </button>
             <button
               className="btn btn-warning float-end me-2"
-              onClick={() => dispatch(updateCourse(course))}
+              onClick={onUpdateCourse}
               id="wd-update-course-click"
             >
               Update
@@ -180,7 +241,7 @@ export default function Dashboard() {
                         <Button
                           onClick={(event) => {
                             event.preventDefault();
-                            dispatch(deleteCourse(course._id));
+                            onDeleteCourse(course._id);
                           }}
                           className="btn btn-danger float-end"
                           id="wd-delete-course-click"

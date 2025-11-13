@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Button,
   InputGroup,
@@ -21,8 +21,9 @@ import {
 } from "react-icons/bs";
 import { FaRegFileAlt, FaTrash } from "react-icons/fa";
 import GreenCheckmark from "../Modules/GreenCheckmark";
-import { deleteAssignment, Assignment } from "./reducer";
+import { deleteAssignment, setAssignments, Assignment } from "./reducer";
 import { RootState } from "../../../store";
+import * as client from "./client";
 
 export default function Assignments() {
   const { cid } = useParams<{ cid: string }>();
@@ -34,13 +35,23 @@ export default function Assignments() {
 
   const isFaculty = currentUser?.role === "FACULTY";
 
+  const fetchAssignments = async () => {
+    const assignments = await client.findAssignmentsForCourse(cid);
+    dispatch(setAssignments(assignments));
+  };
+
+  useEffect(() => {
+    fetchAssignments();
+  }, [cid]);
+
   const handleDeleteClick = (assignmentId: string) => {
     setAssignmentToDelete(assignmentId);
     setShowDeleteDialog(true);
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (assignmentToDelete) {
+      await client.deleteAssignment(assignmentToDelete);
       dispatch(deleteAssignment(assignmentToDelete));
     }
     setShowDeleteDialog(false);

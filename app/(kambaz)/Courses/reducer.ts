@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { courses } from "../Database";
 import { v4 as uuidv4 } from "uuid";
+import { Module } from "./[cid]/Modules/reducer";
 
 export interface Course {
   _id: string;
@@ -13,19 +13,27 @@ export interface Course {
   description: string;
   author?: string;
 }
-
 interface CoursesState {
   courses: Course[];
+  modules: Module[];
 }
 
 const initialState: CoursesState = {
- courses: courses,
+ courses: [],
+ modules: [],
 };
 
 const coursesSlice = createSlice({
  name: "courses",
  initialState,
  reducers: {
+  setModules: (state, action) => {
+    state.modules = action.payload;
+  },
+
+   setCourses: (state, { payload: courses }: PayloadAction<Course[]>) => {
+     state.courses = courses;
+   },
    addNewCourse: (state, { payload: course }: PayloadAction<Partial<Course>>) => {
      const newCourse: Course = { 
        ...course, 
@@ -52,6 +60,6 @@ const coursesSlice = createSlice({
    },
  },
 });
-export const { addNewCourse, deleteCourse, updateCourse } =
+export const { setCourses, addNewCourse, deleteCourse, updateCourse } =
  coursesSlice.actions;
 export default coursesSlice.reducer;
