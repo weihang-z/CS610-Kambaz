@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Button,
   InputGroup,
@@ -35,14 +35,14 @@ export default function Assignments() {
 
   const isFaculty = currentUser?.role === "FACULTY";
 
-  const fetchAssignments = async () => {
+  const fetchAssignments = useCallback(async () => {
     const assignments = await client.findAssignmentsForCourse(cid);
     dispatch(setAssignments(assignments));
-  };
+  }, [cid, dispatch]);
 
   useEffect(() => {
     fetchAssignments();
-  }, [cid]);
+  }, [fetchAssignments]);
 
   const handleDeleteClick = (assignmentId: string) => {
     setAssignmentToDelete(assignmentId);

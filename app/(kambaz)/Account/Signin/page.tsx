@@ -24,8 +24,13 @@ export default function Signin() {
       if (!user) return;
       dispatch(setCurrentUser(user));
       router.push("/Dashboard");
-    } catch (err: any) {
-      setError(err.response?.data?.message || "An error occurred");
+    } catch (err: unknown) {
+      if (err && typeof err === 'object' && 'response' in err) {
+        const error = err as { response?: { data?: { message?: string } } };
+        setError(error.response?.data?.message || "An error occurred");
+      } else {
+        setError("An error occurred");
+      }
     }
   };
 

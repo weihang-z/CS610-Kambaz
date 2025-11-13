@@ -3,7 +3,7 @@ import { Table, Button, Modal, Form } from "react-bootstrap";
 import { FaUserCircle, FaPlus } from "react-icons/fa";
 import { BsPencilSquare, BsTrash } from "react-icons/bs";
 import { useParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../store";
 import * as client from "../client";
@@ -47,18 +47,18 @@ export default function PeopleTable() {
 
   const isFaculty = currentUser?.role === "FACULTY";
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       const enrolledUsers = await client.findUsersForCourse(cid);
       setUsers(enrolledUsers);
     } catch (error) {
       console.error("Failed to fetch users:", error);
     }
-  };
+  }, [cid]);
 
   useEffect(() => {
     fetchUsers();
-  }, [cid]);
+  }, [fetchUsers]);
 
   const handleOpenModal = (user?: User) => {
     if (user) {
@@ -94,7 +94,7 @@ export default function PeopleTable() {
         const updatedUser = await client.updateUser({ ...editingUser, ...formData });
         setUsers(users.map(u => u._id === updatedUser._id ? updatedUser : u));
       } else {
-        const newUser = await client.createUser(formData);
+        await client.createUser(formData);
         await fetchUsers(); 
       }
       handleCloseModal();

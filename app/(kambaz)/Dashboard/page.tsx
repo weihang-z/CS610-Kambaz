@@ -13,9 +13,9 @@ import {
 } from "react-bootstrap";
 import * as client from "../Courses/client";
 import { useDispatch, useSelector } from "react-redux";
-import { addNewCourse, deleteCourse, updateCourse, Course, setCourses  } from "../Courses/reducer";
-import { enrollInCourse, unenrollFromCourse, Enrollment } from "../Database/reducer";
-import { useEffect, useState } from "react";
+import { Course, setCourses  } from "../Courses/reducer";
+import { enrollInCourse, unenrollFromCourse } from "../Database/reducer";
+import { useEffect, useState, useCallback } from "react";
 import { RootState } from "../store";
 
 export default function Dashboard() {
@@ -35,7 +35,7 @@ export default function Dashboard() {
   const [showAllCourses, setShowAllCourses] = useState(false);
   const [allCourses, setAllCourses] = useState<Course[]>([]);
 
-  const fetchCourses = async () => {
+  const fetchCourses = useCallback(async () => {
     if (!currentUser) {
       return;
     }
@@ -45,16 +45,16 @@ export default function Dashboard() {
     } catch (error) {
       console.error(error);
     }
-  };
+  }, [currentUser, dispatch]);
 
-  const fetchAllCourses = async () => {
+  const fetchAllCourses = useCallback(async () => {
     try {
       const courses = await client.fetchAllCourses();
       setAllCourses(courses);
     } catch (error) {
       console.error(error);
     }
-  };
+  }, []);
 
   const onAddNewCourse = async () => {
     const newCourse = await client.createCourse(course);
@@ -62,7 +62,7 @@ export default function Dashboard() {
   };
 
   const onDeleteCourse = async (courseId: string) => {
-    const status = await client.deleteCourse(courseId);
+    await client.deleteCourse(courseId);
     dispatch(setCourses(courses.filter((course) => course._id !== courseId)));
   };
 
@@ -77,7 +77,7 @@ export default function Dashboard() {
   useEffect(() => {
     fetchCourses();
     fetchAllCourses();
-  }, [currentUser]);
+  }, [fetchCourses, fetchAllCourses]);
 
   // Check if user is enrolled in a course (derived from Redux state)
   const isEnrolled = (courseId: string) => {

@@ -5,11 +5,21 @@ import { useRouter } from "next/navigation";
 import { setCurrentUser } from "../reducer";
 import { useDispatch } from "react-redux";
 import { useState } from "react";
-import { FormControl, Button } from "react-bootstrap";
+import { FormControl } from "react-bootstrap";
 import * as client from "../client";
 
+interface User {
+  username?: string;
+  password?: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  dob?: string;
+  role?: string;
+}
+
 export default function Signup() {
-  const [user, setUser] = useState<any>({});
+  const [user, setUser] = useState<User>({});
   const [error, setError] = useState("");
   const dispatch = useDispatch();
   const router = useRouter();
@@ -19,8 +29,13 @@ export default function Signup() {
       const currentUser = await client.signup(user);
       dispatch(setCurrentUser(currentUser));
       router.push("/Account/Profile");
-    } catch (err: any) {
-      setError(err.response?.data?.message || "An error occurred");
+    } catch (err: unknown) {
+      if (err && typeof err === 'object' && 'response' in err) {
+        const error = err as { response?: { data?: { message?: string } } };
+        setError(error.response?.data?.message || "An error occurred");
+      } else {
+        setError("An error occurred");
+      }
     }
   };
 

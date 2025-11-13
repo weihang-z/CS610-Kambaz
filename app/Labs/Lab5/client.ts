@@ -1,6 +1,13 @@
 import axios from "axios";
 const HTTP_SERVER = process.env.NEXT_PUBLIC_HTTP_SERVER;
 
+interface Todo {
+  id?: number;
+  title?: string;
+  completed?: boolean;
+  editing?: boolean;
+}
+
 export const fetchWelcomeMessage = async () => {
   const response = await axios.get(`${HTTP_SERVER}/lab5/welcome`);
   return response.data;
@@ -23,7 +30,7 @@ export const fetchTodos = async () => {
   return response.data;
 };
 
-export const removeTodo = async (todo: any) => {
+export const removeTodo = async (todo: Todo) => {
   const response = await axios.get(`${TODOS_API}/${todo.id}/delete`);
   return response.data;
 };
@@ -33,17 +40,17 @@ export const createNewTodo = async () => {
   return response.data;
 };
 
-export const postNewTodo = async (todo: any) => {
+export const postNewTodo = async (todo: Todo) => {
   const response = await axios.post(`${TODOS_API}`, todo);
   return response.data;
 };
 
-export const deleteTodo = async (todo: any) => {
+export const deleteTodo = async (todo: Todo) => {
   const response = await axios.delete(`${TODOS_API}/${todo.id}`);
   return response.data;
 };
 
-export const updateTodo = async (todo: any) => {
+export const updateTodo = async (todo: Todo) => {
   const response = await axios.put(`${TODOS_API}/${todo.id}`, todo);
   return response.data;
 };

@@ -1,5 +1,5 @@
 "use client";
-import { addModule, editModule, updateModule, deleteModule, Module, Lesson, setModules }
+import { editModule, updateModule, Module, Lesson, setModules }
   from "./reducer";
 import { useSelector, useDispatch } from "react-redux";
 import { useParams } from "next/navigation";
@@ -8,7 +8,7 @@ import { FormControl, ListGroup, ListGroupItem } from "react-bootstrap";
 import { BsGripVertical } from "react-icons/bs";
 import LessonControlButtons from "./LessonControlButtons";
 import ModuleControlButtons from "./ModuleControlButtons";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { RootState } from "../../../store";
 import * as client from "../../client";
 
@@ -19,30 +19,31 @@ export default function Modules() {
   const { modules } = useSelector((state: RootState) => state.modulesReducer);
   const dispatch = useDispatch();
 
-  const fetchModules = async () => {
+  const fetchModules = useCallback(async () => {
     const modules = await client.findModulesForCourse(cid as string);
     dispatch(setModules(modules));
-  };
+  }, [cid, dispatch]);
+  
   useEffect(() => {
     fetchModules();
-  }, []);
+  }, [fetchModules]);
 
   const onCreateModuleForCourse = async () => {
     if (!cid) return;
     const newModule = { name: moduleName, course: cid };
-    const module = await client.createModuleForCourse(cid, newModule);
-    dispatch(setModules([...modules, module]));
+    const createdModule = await client.createModuleForCourse(cid, newModule);
+    dispatch(setModules([...modules, createdModule]));
     setModuleName("");
   };
 
   const onRemoveModule = async (moduleId: string) => {
     await client.deleteModule(moduleId);
-    dispatch(setModules(modules.filter((m: any) => m._id !== moduleId)));
+    dispatch(setModules(modules.filter((m: Module) => m._id !== moduleId)));
   };
 
-  const onUpdateModule = async (module: any) => {
-    await client.updateModule(module);
-    const newModules = modules.map((m: any) => m._id === module._id ? module : m);
+  const onUpdateModule = async (moduleData: Module) => {
+    await client.updateModule(moduleData);
+    const newModules = modules.map((m: Module) => m._id === moduleData._id ? moduleData : m);
     dispatch(setModules(newModules));
   };
 
@@ -73,11 +74,11 @@ export default function Modules() {
                     onChange={(e) =>
                         dispatch(updateModule({ ...module, name: e.target.value }))
                       }
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        onUpdateModule({ ...module, editing: false });
-                      }
-                    }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    onUpdateModule({ ...module, editing: false } as Module);
+                  }
+                }}
                     value={module.name}
                   />
                 )}
