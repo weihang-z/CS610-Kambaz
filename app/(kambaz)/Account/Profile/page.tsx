@@ -19,8 +19,7 @@ export default function Profile() {
    setProfile(currentUser);
  };
  const updateProfile = async () => {
-   const { password, ...profileWithoutPassword } = profile!;
-   const updatedProfile = await client.updateUser({ ...profileWithoutPassword, password: currentUser?.password });
+   const updatedProfile = await client.updateUser(profile!);
    dispatch(setCurrentUser(updatedProfile));
  };
  const signout = async () => {
