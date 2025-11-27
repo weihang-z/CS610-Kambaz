@@ -37,13 +37,15 @@ export default function Modules() {
   };
 
   const onRemoveModule = async (moduleId: string) => {
-    await client.deleteModule(moduleId);
+    await client.deleteModule(cid as string, moduleId);
     dispatch(setModules(modules.filter((m: Module) => m._id !== moduleId)));
   };
 
-  const onUpdateModule = async (moduleData: Module) => {
-    await client.updateModule(moduleData);
-    const newModules = modules.map((m: Module) => m._id === moduleData._id ? moduleData : m);
+  const onUpdateModule = async (module: Module) => {
+    await client.updateModule(cid as string, module);
+    const newModules = modules.map((m: Module) =>
+      m._id === module._id ? module : m
+    );
     dispatch(setModules(newModules));
   };
 

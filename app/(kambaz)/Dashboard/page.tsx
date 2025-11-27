@@ -91,7 +91,7 @@ export default function Dashboard() {
       return;
     }
     try {
-      await client.enrollInCourse(currentUser._id, courseId);
+      await client.enrollIntoCourse(currentUser._id, courseId);
       // Update Redux enrollments state (for course layout access check)
       dispatch(enrollInCourse({ userId: currentUser._id, courseId }));
       // Refetch courses to update enrolled courses list
