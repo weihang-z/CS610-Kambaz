@@ -6,25 +6,10 @@ import { useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../store";
 import * as client from "../../../../Account/client";
+import { User } from "../../../../Account/client";
 import PeopleDetails from "../Details";
-import Link from "next/link";
 
-interface User {
-  _id: string;
-  username: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  dob: string;
-  role: string;
-  loginId: string;
-  section: string;
-  lastActivity: string;
-  totalActivity: string;
-}
-
-export default function PeopleTable({ users = [], fetchUsers }: { users?: any[]; fetchUsers: () => void; }) {
+export default function PeopleTable({ users = [], fetchUsers }: { users?: User[]; fetchUsers: () => void; }) {
   const { currentUser } = useSelector((state: RootState) => state.accountReducer);
   const [showModal, setShowModal] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -160,7 +145,7 @@ export default function PeopleTable({ users = [], fetchUsers }: { users?: any[];
                   style={{ cursor: "pointer" }}
                   onClick={() => {
                     setShowDetails(true);
-                    setShowUserId(user._id);
+                    setShowUserId(user._id || null);
                   }}
                 >
                   <FaUserCircle className="me-2 fs-1 text-secondary" />
@@ -186,7 +171,7 @@ export default function PeopleTable({ users = [], fetchUsers }: { users?: any[];
                   <Button
                     variant="danger"
                     size="sm"
-                    onClick={() => handleDeleteClick(user._id)}
+                    onClick={() => user._id && handleDeleteClick(user._id)}
                   >
                     <BsTrash />
                   </Button>

@@ -1,23 +1,24 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { FaCheck, FaUserCircle } from "react-icons/fa";
 import { FaPencil } from "react-icons/fa6";
 import { IoCloseSharp } from "react-icons/io5";
-import { useParams } from "next/navigation";
-import Link from "next/link";
 import { FormControl } from "react-bootstrap";
 import * as client from "../../../Account/client";
+import { User } from "../../../Account/client";
 
 export default function PeopleDetails({ uid, onClose }: { uid: string | null; onClose: () => void; }) {
-  const [user, setUser] = useState<any>({});
+  const [user, setUser] = useState<User>({});
   const [name, setName] = useState("");
   const [editing, setEditing] = useState(false);
-  const fetchUser = async () => {
+  
+  const fetchUser = useCallback(async () => {
     if (!uid) return;
-    const user = await client.findUserById(uid);
-    setUser(user);
-  };
-  const deleteUser = async (uid: string) => {
-    await client.deleteUser(uid);
+    const foundUser = await client.findUserById(uid);
+    setUser(foundUser);
+  }, [uid]);
+
+  const deleteUser = async (userId: string) => {
+    await client.deleteUser(userId);
     onClose();
   };
   const saveUser = async () => {
@@ -30,7 +31,7 @@ export default function PeopleDetails({ uid, onClose }: { uid: string | null; on
   };
   useEffect(() => {
     if (uid) fetchUser();
-  }, [uid]);
+  }, [uid, fetchUser]);
   if (!uid) return null;
   return (
     <div className="wd-people-details position-fixed top-0 end-0 bottom-0 bg-white p-4 shadow w-25">

@@ -3,12 +3,13 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import PeopleTable from "../../Courses/[cid]/People/Table/page";
 import * as client from "../client";
+import { User } from "../client";
 import { FormControl } from "react-bootstrap";
 import { FaPlus } from "react-icons/fa";
+
 export default function Users() {
- const [users, setUsers] = useState<any[]>([]);
+ const [users, setUsers] = useState<User[]>([]);
  const [role, setRole] = useState("");
- const [name, setName] = useState("");
  const createUser = async () => {
    const user = await client.createUser({
      firstName: "New",
@@ -21,11 +22,10 @@ export default function Users() {
    });
    setUsers([...users, user]);
  };
- const filterUsersByName = async (name: string) => {
-   setName(name);
-   if (name) {
-     const users = await client.findUsersByPartialName(name);
-     setUsers(users);
+ const filterUsersByName = async (searchName: string) => {
+   if (searchName) {
+     const foundUsers = await client.findUsersByPartialName(searchName);
+     setUsers(foundUsers);
    } else {
      fetchUsers();
    }

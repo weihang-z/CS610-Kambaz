@@ -10,7 +10,7 @@ interface Credentials {
   password?: string;
 }
 
-interface User {
+export interface User {
   _id?: string;
   username?: string;
   password?: string;
