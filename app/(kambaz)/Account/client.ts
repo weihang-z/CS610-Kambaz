@@ -19,7 +19,22 @@ interface User {
   email?: string;
   dob?: string;
   role?: string;
+  loginId?: string;
+  section?: string;
+  lastActivity?: string;
+  totalActivity?: string;
 }
+
+export const findUsersByRole = async (role: string) => {
+  const response = await
+    axios.get(`${USERS_API}?role=${role}`);
+  return response.data;
+};
+
+export const findUsersByPartialName = async (name: string) => {
+  const response = await axios.get(`${USERS_API}?name=${name}`);
+  return response.data;
+};
 
 export const signin = async (credentials: Credentials) => {
   const response = await axiosWithCredentials.post(`${USERS_API}/signin`, credentials);

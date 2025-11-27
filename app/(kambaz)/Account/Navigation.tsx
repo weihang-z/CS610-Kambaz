@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSelector } from "react-redux";
 import { RootState } from "../store";
+import NavLink from "react-bootstrap/esm/NavLink";
 
 export default function AccountNavigation() {
   const { currentUser } = useSelector((state: RootState) => state.accountReducer);
@@ -23,6 +24,8 @@ export default function AccountNavigation() {
           {link}
         </Link>
       ))}
+           {currentUser && currentUser.role === "ADMIN" && (
+       <NavLink as={Link} href={`/Account/Users`}  active={pathname.endsWith('Users')}> Users </NavLink> )}
       </div>
     );
   }
